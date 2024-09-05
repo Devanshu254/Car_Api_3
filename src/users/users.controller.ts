@@ -1,21 +1,31 @@
-import { Body, ClassSerializerInterceptor, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Query, Session, UseInterceptors } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Query, Session, UseInterceptors, UseGuards} from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { Serialize, SerializeInterceptor } from 'src/interceptors/serialize.interceptor';
 import { UserDto } from './dtos/user.dto';
 import { AuthService } from './auth.service';
+import { CurrentUser } from './decorators/current-user.decorator';
+import { CurrentUserInterceptor } from './interceptors/current-user.interceptor';
+import { AuthGuard } from 'src/guards/auth.guard';
 
 @Controller('auth')
 @Serialize(UserDto)
+@UseInterceptors(CurrentUserInterceptor)
 export class UsersController {
     constructor(
         private authService: AuthService,
         private userService: UsersService) {}
 
-    @Get('/whoAmi')
-    whoAmi(@Session() session: any) {
-        return this.userService.findOne(session.userId);
+    // @Get('/whoAmi')
+    // whoAmi(@Session() session: any) {
+    //     return this.userService.findOne(session.userId);
+    // }
+
+    @Get('/whoAmI')
+    @UseGuards(AuthGuard) // If the user is not signed in they will not be able to access this route handler.
+    whoAmI(@CurrentUser() user: string) {
+        return user;
     }
 
     @Post('signout')
