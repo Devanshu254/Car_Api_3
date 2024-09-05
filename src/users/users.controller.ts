@@ -17,7 +17,12 @@ export class UsersController {
     whoAmi(@Session() session: any) {
         return this.userService.findOne(session.userId);
     }
-    
+
+    @Post('signout')
+    singout(@Session() session: any) {
+        session.userId = null;
+    }
+
     @Post('signup')
     async createUser(@Body() body: CreateUserDto, @Session() session: any) {
         const user =  await this.authService.singup(body.email, body.password);
